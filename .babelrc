@@ -1,0 +1,13 @@
+//http://blog.csdn.net/weixin_41559723/article/details/79116049
+{
+	"presets": [
+    [
+      "env",
+      {
+        "targets": {
+          "browsers": ["last 2 versions", "ie >= 7"]
+        }
+      }
+    ]
+  ]
+}
