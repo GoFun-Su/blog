@@ -6,7 +6,7 @@
 </style>
 <template>
         <div class="register">
-            <div class="item">
+            <!-- <div class="item">
                 <label for="mobile">手机号：</label>
                 <input type="text" id="mobile" 
                         class="form-control input" 
@@ -14,6 +14,15 @@
                         placeholder="请输入手机号"
                         v-model="mobile"
                         v-validator:mobile="mobile">
+            </div> -->
+            <div class="item">
+                <label for="name">用户名</label>
+                <input type="text" id="name" 
+                            class="form-control input" 
+                            name="name"
+                            placeholder="请输入用户名"
+                            v-model="name"
+                            v-validator:name="name">
             </div>
             <div class="item">
                 <label for="email">邮箱</label>

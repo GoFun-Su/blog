@@ -7,11 +7,11 @@
 <template>
         <div class="login">
             <div class="item">
-                <label for="name">手机号/邮箱：</label>
+                <label for="name">用户名：</label>
                 <input type="text" id="name" 
                         class="form-control input" 
                         name="name"
-                        placeholder="请输入手机号/用户名"
+                        placeholder="请输入用户名"
                         v-model="name"
                         v-validator:name="name">
             </div>
@@ -24,7 +24,7 @@
                         v-model="password"
                         v-validator:password="password">
             </div>
-            <button class="btn">登录</button>
+            <button class="btn" @click="login()">登录</button>
             <div class="prompt-box">
                 <span>没有账号？</span>
                 <span @click="switchStateToReg()" class="switch-state">注册</span>
@@ -54,6 +54,11 @@ export default {
     methods: {
       switchStateToReg:function(){
         this.$emit("switchStateToReg")
+      },
+      login:function(){
+        this.$allValidate().then().catch(err =>{
+            
+        })
       }
     }
 }

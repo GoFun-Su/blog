@@ -120,7 +120,9 @@ export default {
     data() {
         return {
             isFocus:false,
-            showMask:false
+            showMask:false,
+            operateType:"",
+            name:""
         }
     },
     computed: {

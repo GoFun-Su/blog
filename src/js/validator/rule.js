@@ -9,8 +9,6 @@ import {
   series
 } from './util'
 
-import { rules } from './buildinRule'
-import { messages } from './config'
 /**
  * 验证规则：
  * 1：字段为空，使用默认值default代替
@@ -23,22 +21,10 @@ function validate (rule, ctx) {
         //返回错误提示内容
         let proxy = (err) => {
             if(err){
-                reject(msg[err]  || messages[err] || '输入的值不合法')
-            }else {
-                //当是自己填加的规则的时候
-                reject('输入的值不合法')
+                reject(msg[err]  || '输入的值不合法')
             }
-            
         }
         let { value } = ctx;
-        //如果是自己添加的规则
-        if (isFunction(rule)) {
-            if (rule.call(this, value, ctx)) {
-                return resolve()
-            }else{
-                return proxy()
-            }
-        };
 
         let {
           msg = messages,
@@ -93,26 +79,18 @@ function verify (type, value, ctx, rule) {
     if (isString(type)) {
       switch (type) {
         case 'string':
-          value = String(value)
-          if(Array(length) && (value.length < length[0] || value.length > length[1])) {
-            return reject('length')
-          }
-          resolve()
-          break
+            value = String(value)
+            if(length){
+                if(Array(length) && (value.length < length[0] || value.length > length[1])) {
+                    return reject('length')
+                }
+            }
+            resolve()
+            break
         default:
-          if (type in rules) {
-            var boo = rules[type].call(this, value, ctx)
-            return isString(boo) ? reject(new Error(boo)) : boo ? resolve() : reject(type)
-          }
-
           resolve()
           break
       }
-    } else if (isRegExp(type)) {
-        if (!type.test(value)) {
-            return reject('regexp')
-        }
-        resolve()
     }
   })
 }

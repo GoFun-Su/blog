@@ -13,9 +13,7 @@ el.onblur= function(){
 //我们做项目的时候，经常一个根组件上挂着N个子组件，子组件上又可能挂着N个子组件。
 //vnode.context获取的实例，是绑定该指令的组件的实例
 import validate from './rule'
-import { addValidation,rules } from './buildinRule'
 import { isObject } from './util'
-import { disposeMessages } from './config'
 
 var validator = {};
 const _ = {};
@@ -27,7 +25,6 @@ validator.install = (Vue, options = {}) =>{
     }
 
     let { field = 'errors' } = options
-    disposeMessages(options.messages)
     let uid = 0
 
   	// 错误缓存对象
@@ -61,7 +58,7 @@ validator.install = (Vue, options = {}) =>{
 		    }
 		    Vue.set(vm[field], key, undefined)
 		    // 设置一份上下文, 用于通信
-		     const context = errorCache[id] = {
+		    const context = errorCache[id] = {
 		        // errors的key
 		        key: key,
 		        // 当前绑定的节点
@@ -107,7 +104,7 @@ validator.install = (Vue, options = {}) =>{
 		   if (context.value === context.oldValue && !isObject(context.value)) return
 
 		    // 验证规则
-		    var validationModel = _.__validationModel[binding.arg] || rules[binding.arg] 
+		    var validationModel = _.__validationModel[binding.arg]
 		    //或代表是自己添加的规则
 	    	if(validationModel){
             	validate.call(vm, validationModel, context).then(() => {
@@ -128,6 +125,44 @@ validator.install = (Vue, options = {}) =>{
         _.__validationModel = model;
     }
 
+
+    Vue.prototype.$allValidate = function () {
+        return new Promise((resolve, reject) => {
+	      	if (!_.__validationModel) {
+	        	resolve()
+	      	} else {
+	        	// 实例对应对错误缓存对象
+	        	const errCache = cache[this._uid]
+	        	if (!errCache) {
+	          		return resolve()
+	        	}
+	        	const promises = Object.keys(errCache).map((key) => new Promise((resolve, reject) => {
+	          		const context = errCache[key]
+	          		if (!context) {
+	            		return resolve()
+	          		}
+	          		// 验证规则
+	          		const validationModel = _.__validationModel[context.rule]
+	          		if (validationModel) {
+	            		validate.call(this, validationModel, context).then(() => {
+	              			context.msg = undefined
+	              			context.check()
+	              			resolve()
+	            		}).catch((err) => {
+	              			context.msg = err
+	             	 		context.check()
+	              			reject(err)
+	            		})
+	          		} else {
+	            		resolve()
+	          		}
+	        	}))
+
+	        	Promise.all(promises).then(() => { resolve() }).catch(reject)
+	      	}
+    	})
+    }
+
 }    
 // 自动提示
 function autoHint (el) {
@@ -142,5 +177,4 @@ function autoHint (el) {
 function before (el, target) {
   target.parentNode.insertBefore(el, target)
 }
-validator.addValidation = addValidation
 module.exports = validator;
