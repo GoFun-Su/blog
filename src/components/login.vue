@@ -13,7 +13,7 @@
                         name="name"
                         placeholder="请输入用户名"
                         v-model="name"
-                        v-validator:name="name">
+                        v-validator:name="'required|name'">
             </div>
            <div class="item">
                 <label for="password">密码</label>
@@ -22,7 +22,7 @@
                         name="password"
                         placeholder="请输入密码"
                         v-model="password"
-                        v-validator:password="password">
+                        v-validator:password="'required|password'">
             </div>
             <button class="btn" @click="login()">登录</button>
             <div class="prompt-box">

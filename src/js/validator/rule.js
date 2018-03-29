@@ -1,97 +1,93 @@
-/* eslint-disable prefer-promise-reject-errors */
 import {
-  isRegExp,
-  isString,
-  isArray,
-  isFunction,
-  isEmpty,
-  isNumber,
-  series
+	isEmpty,
+	isString,
+	isMobile,
+	isName,
+	isEmail,
+	isPassword,
+	isRepassword,
+	converterRole,
+	series,
+	rules
 } from './util'
+function validate(ctx){
+	return new Promise((resolve,reject) =>{
 
-/**
- * 验证规则：
- * 1：字段为空，使用默认值default代替
- * 2：是否是required字段
- * 3：使用type判断字段类型
- * 4: 使用check判断是否通过
- */
-function validate (rule, ctx) {
-  return new Promise((resolve, reject) => {
-        //返回错误提示内容
-        let proxy = (err) => {
-            if(err){
-                reject(msg[err]  || '输入的值不合法')
-            }
-        }
-        let { value } = ctx;
+		let {value,rule,key} = ctx
+		let rules = rule.split("|")
 
-        let {
-          msg = messages,
-          required,
-          type,
-          check
-        } = rule
+		let proxy = (err) => {
 
-        //判断是否为空以及是否是必填
-        if (isEmpty(value)) {
-          // 必填
-          if (required) {
-            return proxy('required')
-          } else if (required === false) { 
-            // 非必填 ，返回成功
-            return resolve()
-          }
-        }
+			let {type,name,text} = err 
+			let role = converterRole[name]
 
-        //验证其他规则
-        // 验证类型，默认不写type为string
-        let types = type
-        if (types) {
-          if (!isArray(types)) {
-            types = [types]
-          }
-        } else {
-          types = ['string']
-        }
+	      	if(text){
+	      		reject(role+err.text)
+	      	}else {
+	      		reject(role+"格式不正确")
+	      	}
+	    }
+			
+		let promises = rules.map((type) => verify.bind(this, type, value, ctx))
 
-        let promises = types.map((type) => verify.bind(this, type, value, ctx, rule))
-
-        series(promises).then(() => {
-            if(check){
-                if (isFunction(check)) {
-                    var boo = check.call(this, value, ctx)
-                    return isString(boo) ? reject(boo) : boo ? resolve() : proxy('check')
-                }
-            }
-            resolve()
-        }).catch(proxy)
-    })
+		series(promises).then(() => {
+			resolve()
+		}).catch((err)=>{
+			proxy(err);
+		})  
+		
+	})
 }
 
-
-function verify (type, value, ctx, rule) {
-  let {
-    length
-  } = rule
-
-  return new Promise((resolve, reject) => {
-    if (isString(type)) {
-      switch (type) {
-        case 'string':
-            value = String(value)
-            if(length){
-                if(Array(length) && (value.length < length[0] || value.length > length[1])) {
-                    return reject('length')
-                }
-            }
-            resolve()
-            break
-        default:
-          resolve()
-          break
-      }
-    }
-  })
+//new promise只能穿一个参数
+function verify(type,value,ctx) {
+	let {key} = ctx
+	return new Promise((resolve, reject) => {
+   		switch (type) {
+   			case "required":
+		        if (isEmpty(value)) {
+		           return reject({type:"required",name:key,text:"必填"})
+		        }
+		        resolve()
+		        break;
+		    /*case "mobile":
+		    	if(!isMobile(value)) {
+		    		return reject({type:"mobile",name:key})
+		    	}
+		    	resolve()
+		    	break;*/
+		    case "name":
+		    	if(!isName(value)) {
+		    		return reject({type:"name",name:key})
+		    	}
+		    	resolve()
+		    	break;
+		    case "email":
+		    	if(!isEmail(value)) {
+		    		return reject({type:"email",name:key})
+		    	}
+		    	resolve()
+		    	break;
+		    case "password":
+		    	if(!isPassword(value)) {
+		    		return reject({type:"password",name:key,text:"长度在3-10"})
+		    	}
+		    	resolve()
+		    	break;
+		    case "repassword":
+		    	if(!isRepassword(value,this.password)) {
+		    		return reject({type:"isRepassword",name:key,text:"和密码不一致"})
+		    	}
+		    	resolve()
+		    	break;
+		    default:
+			    if (type in rules) {
+	            	var boo = rules[type].call(this, value, ctx)
+	            	return boo ? resolve() : reject({type:type,name:type})
+	          	}
+	          	resolve()
+	          	break
+   		}
+    })
 }
 export default validate
