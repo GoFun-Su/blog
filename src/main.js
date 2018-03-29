@@ -1,7 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import vueValidator from  '@/js/validator/validate'
-import model from '@/js/validator/model'
 
 import '@/css/common'
 import Common from '@/js/common'
@@ -31,9 +30,6 @@ var vue = new Vue({
     el: '#app',
     router: router,
     mixins: ["error"],
-    mounted() {
-        this.$initValidate(model)
-    },
     render: h => h(Index)
     
 })

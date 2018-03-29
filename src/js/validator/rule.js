@@ -18,7 +18,7 @@ function validate(ctx){
 
 		let proxy = (err) => {
 
-			let {type,name,text} = err 
+			let {name,text} = err 
 			let role = converterRole[name]
 
 	      	if(text){
@@ -46,44 +46,47 @@ function verify(type,value,ctx) {
    		switch (type) {
    			case "required":
 		        if (isEmpty(value)) {
-		           return reject({type:"required",name:key,text:"必填"})
+		           return reject({name:key,text:"必填"})
 		        }
 		        resolve()
 		        break;
-		    /*case "mobile":
+		    case "mobile":
 		    	if(!isMobile(value)) {
-		    		return reject({type:"mobile",name:key})
+		    		return reject({name:key})
 		    	}
 		    	resolve()
-		    	break;*/
+		    	break;
 		    case "name":
 		    	if(!isName(value)) {
-		    		return reject({type:"name",name:key})
+		    		return reject({name:key})
 		    	}
 		    	resolve()
 		    	break;
 		    case "email":
 		    	if(!isEmail(value)) {
-		    		return reject({type:"email",name:key})
+		    		return reject({name:key})
 		    	}
 		    	resolve()
 		    	break;
 		    case "password":
 		    	if(!isPassword(value)) {
-		    		return reject({type:"password",name:key,text:"长度在3-10"})
+		    		return reject({name:key,text:"长度在3-10"})
 		    	}
 		    	resolve()
 		    	break;
 		    case "repassword":
+		    	if(!isPassword(value)) {
+		    		return reject({name:key,text:"长度在3-10"})
+		    	}
 		    	if(!isRepassword(value,this.password)) {
-		    		return reject({type:"isRepassword",name:key,text:"和密码不一致"})
+		    		return reject({name:key,text:"和密码不一致"})
 		    	}
 		    	resolve()
 		    	break;
 		    default:
 			    if (type in rules) {
 	            	var boo = rules[type].call(this, value, ctx)
-	            	return boo ? resolve() : reject({type:type,name:type})
+	            	return boo ? resolve() : reject({name:type})
 	          	}
 	          	resolve()
 	          	break

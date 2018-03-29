@@ -76,40 +76,30 @@ validator.install = (Vue, options = {}) =>{
 	    	
 	    }
 	});
-
-	Vue.prototype.$initValidate = function (model) {
-        if (!model)return;
-        _.__validationModel = model;
-    }
     Vue.prototype.$allValidate = function () {
         return new Promise((resolve,reject)=>{
-        	if(!_.__validationModel) {
-        		resolve()
-        	}else {
-        		const errorCache = cache[this._uid]
-        		if(!errorCache) {
-        			resolve()
-        		}
-        		let promise = Object.keys(errorCache).map((key) => new Promise((resolve,reject) =>{
-        				const context = errorCache[key]
-				    	validate.call(this, context).then(() => {
-				    		context.msg = undefined
-			          		context.check()
-			          		resolve()
-				    	}).catch((err) =>{
-				    		context.msg = err
-			          		context.check()
-			          		reject()
-				    	})
-        			})
-        		)
-        		Promise.all(promise).then(()=>{
-        			resolve()
-        		}).catch(()=>{
-        			reject()
-        		})
-        		
-        	}
+    		const errorCache = cache[this._uid]
+    		if(!errorCache) {
+    			resolve()
+    		}
+    		let promise = Object.keys(errorCache).map((key) => new Promise((resolve,reject) =>{
+    				const context = errorCache[key]
+			    	validate.call(this, context).then(() => {
+			    		context.msg = undefined
+		          		context.check()
+		          		resolve()
+			    	}).catch((err) =>{
+			    		context.msg = err
+		          		context.check()
+		          		reject()
+			    	})
+    			})
+    		)
+    		Promise.all(promise).then(()=>{
+    			resolve()
+    		}).catch(()=>{
+    			reject()
+    		})
         })
     }
     
